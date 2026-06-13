@@ -2,17 +2,17 @@ name: Clone App Repository
 
 on:
     workflow_call:
-        inputs:
-            app_repo:
-                required: true
-                type: string
-            app_branch:
-                required: true
-                type: string
+        # inputs:
+        #     app_repo:
+        #         required: true
+        #         type: string
+        #     app_branch:
+        #         required: true
+        #         type: string
         
-        secrets:
-            PIPELINE_PAT_TOKEN:
-                required: true
+        # secrets:
+        #     PIPELINE_PAT_TOKEN:
+        #         required: true
 
 jobs:
     clone:
