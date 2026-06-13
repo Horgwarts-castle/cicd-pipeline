@@ -9,6 +9,12 @@ on:
                 type: string
                 default: '.'
 
+            python-version:
+                description: 'Python version to set up'
+                required: false
+                type: string
+                default: "3.12"
+
 jobs:
     test:
         runs-on: ubuntu-latest
@@ -24,6 +30,27 @@ jobs:
                 name: prepared-source-artifact
                 path: .
 
-            - name: Run Tests
+            - name: Setup Python
+              uses: actions/setup-python@v5
+              with:
+                python-version: ${{ inputs.python-version }}
+
+            - name: Cache pip dependencies
+              uses: actions/cache@v4
+              with:
+                path: ~/.cache/pip
+                key: ${{ runner.os }}-pip-${{ hashFiles(format('{0}/requirements.txt',inputs.app_directory)) }}
+                restore-keys: |
+                  ${{ runner.os }}-pip-
+
+
+            - name: Install dependencies
               run: |
-                pytest -v
+                  pip install --upgrade pip
+                  if [ -f requirements.txt ]; then
+                   pip install -r requirements.txt
+                  fi
+
+            - name: Run tests
+              run: |
+                  pytest -v
