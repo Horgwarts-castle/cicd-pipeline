@@ -22,10 +22,20 @@ jobs:
             security-events: write
 
         steps:
+            - uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
+
             - name: Download prepared artifact
               uses: actions/download-artifact@v4
               with:
                 name: prepared-source-artifact
+
+            - name: Verify git metadata
+              run: |
+                ls -la
+                git status
+                git rev-parse --is-inside-work-tree
 
             - name: Run Gitleaks
               id: gitleaks
