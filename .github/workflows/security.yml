@@ -29,6 +29,9 @@ jobs:
               continue-on-error: true
               env:
                 GITHUB_TOKEN: ${{ github.token }}
+                GITLEAKS_ENABLE_UPLOAD_ARTIFACT: true
+              with: 
+                args: detect --source . --no-git --redact --verbose
 
             - name: Run Trivy filesystem scan
               id: trivy
