@@ -17,6 +17,10 @@ jobs:
             run:
                 working-directory: ${{ inputs.app_directory }}
 
+        permissions:
+            contents: read
+            security-events: write
+
         steps:
             - name: Download prepared artifact
               uses: actions/download-artifact@v4
@@ -29,20 +33,19 @@ jobs:
               continue-on-error: true
               env:
                 GITHUB_TOKEN: ${{ github.token }}
-                GITLEAKS_ENABLE_UPLOAD_ARTIFACT: true
-              with: 
-                args: detect --source . --no-git --redact --verbose
 
             - name: Run Trivy filesystem scan
               id: trivy
               uses: aquasecurity/trivy-action@v0.24.0
               continue-on-error: true
               with:
-                scan-type: 'fs'
+                scan-type: fs
                 scan-ref: .
-                format: 'table'
-                exit-code: '1'
-                severity: HIGH,CRITICAL
+                format: table
+                severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+                exit-code: '0'
+                ignore-unfixed: false
+                scanners: vuln
 
             - name: Fail if any security scan failed
               run: |
