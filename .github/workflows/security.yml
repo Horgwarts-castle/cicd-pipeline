@@ -46,7 +46,7 @@ jobs:
 
             - name: Run Trivy filesystem scan
               id: trivy
-              uses: aquasecurity/trivy-action@v0.24.0
+              uses: aquasecurity/trivy-action@57a97c75c88686a347317c464e83701463fa7a34 # v0.35.0
               continue-on-error: true
               with:
                 scan-type: fs
