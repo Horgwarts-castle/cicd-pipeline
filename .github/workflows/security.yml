@@ -1,0 +1,38 @@
+name: Security Scan
+
+on:
+    workflow_call:
+        inputs:
+            app_directory:
+                description: 'Directory of the application within the repository'
+                required: false
+                type: string
+                default: '.'
+
+jobs:
+    security:
+        runs-on: ubuntu-latest
+
+        defaults:
+            run:
+                working-directory: ${{ inputs.app_directory }}
+
+        steps:
+            - name: Download prepared artifact
+              uses: actions/download-artifact@v4
+              with:
+                name: prepared-source-artifact
+
+            - name: Run Gitleaks
+              uses: gitleaks/gitleaks-action@v2
+              env:
+                GITHUB_TOKEN: ${{ github.token }}
+
+            - name: Run Trivy filesystem scan
+              uses: aquasecurity/trivy-action@v0.24.0
+              with:
+                scan-type: 'fs'
+                scan-ref: .
+                format: 'table'
+                exit-code: '1'
+                severity: HIGH,CRITICAL

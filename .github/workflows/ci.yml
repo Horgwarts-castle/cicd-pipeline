@@ -38,3 +38,9 @@ jobs:
         uses: ./.github/workflows/test.yml
         with:
             app_directory: ${{ inputs.app_directory }}
+
+    security:
+        needs: setup-runtime
+        uses: ./.github/workflows/security.yml
+        with:
+            app_directory: ${{ inputs.app_directory }}
