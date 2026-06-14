@@ -44,3 +44,10 @@ jobs:
         uses: ./.github/workflows/security.yml
         with:
             app_directory: ${{ inputs.app_directory }}
+
+    docker-build-push:
+        needs:
+            - lint
+            - test
+            - security
+        uses: ./.github/workflows/docker-build.yml
