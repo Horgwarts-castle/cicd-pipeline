@@ -22,27 +22,37 @@ jobs:
             security-events: write
 
         steps:
-            # - uses: actions/checkout@v4
-            #   with:
-            #     fetch-depth: 0
+            - uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
 
             - name: Download prepared artifact
               uses: actions/download-artifact@v4
               with:
                 name: prepared-source-artifact
 
-            # - name: Verify git metadata
-            #   run: |
-            #     ls -la
-            #     git status
-            #     git rev-parse --is-inside-work-tree
+            - name: Verify git metadata
+              run: |
+                ls -la
+                git status
+                git rev-parse --is-inside-work-tree
 
-            # - name: Run Gitleaks
-            #   id: gitleaks
+            - name: Install Gitleaks
+              run: |
+                VERSION=8.24.3
+                wget https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_linux_x64.tar.gz
+                tar -xzf gitleaks_${VERSION}_linux_x64.tar.gz
+                sudo mv gitleaks /usr/local/bin/
+                gitleaks version
+
+            - name: Run Gitleaks
+              id: gitleaks
             #   uses: gitleaks/gitleaks-action@v2
-            #   continue-on-error: true
-            #   env:
-            #     GITHUB_TOKEN: ${{ github.token }}
+              run: |
+                gitleaks git --redact
+              continue-on-error: true
+              env:
+                GITHUB_TOKEN: ${{ github.token }}
 
             - name: Run Trivy filesystem scan
               id: trivy
@@ -57,26 +67,26 @@ jobs:
                 ignore-unfixed: false
                 scanners: vuln,secret,misconfig
 
-            # - name: Fail if any security scan failed
-            #   run: |
-            #     echo "Gitleaks outcome: ${{ steps.gitleaks.outcome }}"
-            #     echo "Trivy outcome: ${{ steps.trivy.outcome }}"
+            - name: Fail if any security scan failed
+              run: |
+                echo "Gitleaks outcome: ${{ steps.gitleaks.outcome }}"
+                echo "Trivy outcome: ${{ steps.trivy.outcome }}"
 
-            #     FAILED=0
+                FAILED=0
 
-            #     if [[ "${{ steps.gitleaks.outcome }}" == "failure" ]]; then
-            #         echo "::error::Gitleaks detected secrets."
-            #         FAILED=1
-            #     fi
+                if [[ "${{ steps.gitleaks.outcome }}" == "failure" ]]; then
+                    echo "::error::Gitleaks detected secrets."
+                    FAILED=1
+                fi
 
-            #     if [[ "${{ steps.trivy.outcome }}" == "failure" ]]; then
-            #         echo "::error::Trivy detected vulnerabilities."
-            #         FAILED=1
-            #     fi
+                if [[ "${{ steps.trivy.outcome }}" == "failure" ]]; then
+                    echo "::error::Trivy detected vulnerabilities."
+                    FAILED=1
+                fi
 
-            #     if [[ $FAILED -eq 1 ]]; then
-            #         echo "::error::Security scan failed."
-            #         exit 1
-            #     fi
+                if [[ $FAILED -eq 1 ]]; then
+                    echo "::error::Security scan failed."
+                    exit 1
+                fi
 
-            #     echo "✅ All security scans passed."
+                echo "✅ All security scans passed."
