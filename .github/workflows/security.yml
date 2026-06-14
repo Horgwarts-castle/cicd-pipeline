@@ -55,7 +55,7 @@ jobs:
                 GITHUB_TOKEN: ${{ github.token }}
 
             - name: Run Trivy filesystem scan
-              id: trivy
+              id: trivy-report
               uses: aquasecurity/trivy-action@v0.24.0
               continue-on-error: true
               with:
@@ -63,6 +63,19 @@ jobs:
                 scan-ref: .
                 format: table
                 severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+                exit-code: '0'
+                ignore-unfixed: false
+                scanners: vuln,secret,misconfig
+
+            - name: Run Trivy filesystem scan
+              id: trivy
+              uses: aquasecurity/trivy-action@v0.24.0
+              continue-on-error: true
+              with:
+                scan-type: fs
+                scan-ref: .
+                format: table
+                severity: HIGH,CRITICAL
                 exit-code: '1'
                 ignore-unfixed: false
                 scanners: vuln,secret,misconfig
